@@ -20,21 +20,57 @@ from gerrychain.proposals import recom
 from gerrychain.accept import always_accept
 from functools import partial
 import geopandas as gpd
-import time
+import time, statistics
 
-# Load in graph from JSON
-gdf = gpd.read_file("./GA/GA.shp")
-gdf = gdf.dropna()
-ga_graph = Graph.from_geodataframe(gdf)
+def mm(part, election):
+    
+    """
+    TODO: Calculate the mean-median difference of the districting map corresponding to partition `part`
+    Return the value of the mean-median difference, from the perspective of the Democratic party.
+    """
+ 
+    vote_share_dem = part[election].percents("Democratic")
+    
+    mean_vote_share = np.mean(vote_share_dem)
+    median_vote_share = statistics.median(vote_share_dem)
+
+    print(f"Mean vote share is {mean_vote_share} and median vote share is {median_vote_share}")
+
+    return median_vote_share - mean_vote_share
 
 
-#ga_graph = Graph.from_json("./GA/GA.geojson")
+def eg(part, election):
+    """
+    TODO: Calculate the efficiency gap of the districting map corresponding to partition `part`, 
+    using the wasted votes definition of the efficiency gap.
+    Return the value of the efficiency gap, from the perspective of the Democratic party.
+    """
 
+    wv_dem = 0
+    wv_rep = 0
+    all_votes = 0
 
-#Define constants
-POPULATION_TOLERANCE = 0.02
-NUM_IL_DISTS = 17
-TOT_POP = sum([ga_graph.nodes()[v]['TOTPOP'] for v in ga_graph.nodes()])
+    for d in range(len(part[election].percents("Democratic"))):
+        total_votes = part[election].votes("Democratic")[d] + part[election].votes("Republican")[d]
+
+        all_votes += total_votes
+
+        rep_vs = part[election].percents("Republican")[d]
+        dem_vs = part[election].percents("Democratic")[d]
+
+        #If republicans won, wasted votes for democrats = all democrat votes
+        # Wasted republican votes is every vote over 50%
+        if rep_vs > dem_vs:
+            wv_dem += part[election].votes("Democratic")[d]
+            wv_rep += part[election].votes("Republican")[d] - total_votes / 2
+        
+        #Else, the opposite
+        else:
+            wv_rep += part[election].votes("Republican")[d]
+            wv_dem += part[election].votes("Democratic")[d] - total_votes / 2
+
+    return (wv_rep - wv_dem) / all_votes
+
 
 #Determine number of democratic-won districts for a given partition
 def dem_winning_dists(partition):
@@ -58,6 +94,21 @@ def get_num_maj_latino_dists(partition):
     
         return num_dists
 
+# Load in graph from JSON
+# gdf = gpd.read_file("./GA_clean.json")
+# gdf = gdf.dropna()
+# ga_graph = Graph.from_geodataframe(gdf)
+
+
+ga_graph = Graph.from_json("./GA_clean.json")
+
+
+#Define constants
+POPULATION_TOLERANCE = 0.02
+NUM_IL_DISTS = 17
+TOT_POP = sum([ga_graph.nodes()[v]['TOTPOP'] for v in ga_graph.nodes()])
+
+
 #Start timer
 start_time = time.time()
 
@@ -75,13 +126,16 @@ Elections from json file:
 #     Election("USS20", {"Democratic": "G20USSD", "Republican": "G20USSR"}),
 # ]
 
+#Set updaters so that we can make histograms for mean median and efficiency gap, dem/rep winning districts, and cut edges
+#Also marginal box plots
+
 # Declare updaters to be used per partition in the random walk
 my_updaters = {"population": updaters.Tally("TOTPOP", alias="population"), 
                "cut_edges": cut_edges, 
-               #"dem_winning_dists": dem_winning_dists,
+               "mean_median": mm,
+                "efficiency_gap": eg,
                "dist_pop": Tally("TOTPOP", alias="dist_pop"),
-               "dist_latino_pop": Tally("HISP", alias="dist_latino_pop")}
-
+                }
 # election_updaters = {election.name: election for election in elections}
 # my_updaters.update(election_updaters)
 
@@ -94,7 +148,7 @@ initial_partition = Partition(
 
 # Create the partial to iterate over in the random walk
 random_walk_partial = partial(recom,
-                              pop_col = "TOTPOP",
+                              pop_col = "VAP",
                               epsilon = POPULATION_TOLERANCE,
                               pop_target=TOT_POP/NUM_IL_DISTS,
                               node_repeats=2,
