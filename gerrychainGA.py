@@ -11,7 +11,7 @@ import numpy as np
 from gerrychain.metrics import mean_median, efficiency_gap
 
 # ------------------------- Define Constants -------------------------
-POPULATION_TOLERANCE = 0.02
+POPULATION_TOLERANCE = 0.2
 NUM_GA_DISTS = 14
 NUM_STEPS = 10
 
@@ -24,7 +24,7 @@ def find_tot_pop(graph):
     return sum([graph.nodes()[v]['TOTPOP'] for v in graph.nodes()])
 
 # ------------------- Set Up The Initial Partition -------------------
-def create_initial_partition(elections, graph):
+def initialize_partition(elections, graph):
     my_updaters = {"population": updaters.Tally("TOTPOP", alias="population"), 
             "cut_edges": cut_edges, 
             "district Black": Tally("BVAP", alias="district Black")
@@ -59,19 +59,23 @@ def execute_random_walk(initial_partition, num_steps, num_dist, graph):
                               initial_state=initial_partition,
                               total_steps=num_steps)
 
+    print(f"Successfully ran chain for {num_steps} steps!")
     return random_walk
 
 # ----------------------- Gather Relevant Data -----------------------
 # Gather relevant data for each partition in the random walk
-def gather_data(random_walk):
+def gather_data(random_walk, election, data_type):
+    gathered_data = []
     for partition in random_walk:
-        gov_mm = mean_median(partition["G18GOV"])
-        atg_mm = mean_median(partition["G18ATG"])
-        agr_mm = mean_median(partition["G18AGR"])
-        print("Gov_MM =", gov_mm)
-        print("ATG_MM =", atg_mm)
-        print("AGR_MM =", agr_mm)
-    print(f"Successfully ran chain for {NUM_STEPS} steps!")
+        if data_type == "eg":
+            gathered_data.append(efficiency_gap(partition[election.name]))
+        elif data_type == "mm":
+            gathered_data.append(mean_median(partition[election.name]))
+        elif data_type == "D_wins":
+            gathered_data.append(partition[election.name].wins("Democratic"))
+        elif data_type == "cut_edges":
+            gathered_data.append(len(partition["cut_edges"]))
+    return gathered_data
 
 # -------------------------- Main Function ---------------------------
 def main():
@@ -98,14 +102,35 @@ def main():
     ]
 
     # Create initial partition
-    initial_partition = create_initial_partition(elections, ga_graph)
+    initial_partition = initialize_partition(elections, ga_graph)
 
     # Execute random walk
     random_walk = execute_random_walk(initial_partition, NUM_STEPS, NUM_GA_DISTS, ga_graph)
 
     # Gather relevant data
-    # gather_data(random_walk)
+    EGs = []
+    MMs = []
+    D_wins = []
+    cut_edges = []
+    for election in elections:
+        # Efficency Gap
+        EGs = gather_data(random_walk, election, "eg")
+        # Mean Median
+        MMs = gather_data(random_walk, election, "mm")
+        # Dem-won Districts
+        D_wins = gather_data(random_walk, election, "D_wins")
 
+    # Cut Edges
+    cut_edges = gather_data(random_walk, election, "cut_edges")
+
+    # Print the gathered data
+    for election, EG, MM, D_win, cut_edge in zip(elections, EGs, MMs, D_wins, cut_edges):
+        print(f"\n{election.name}:")
+        print(f"Efficiency Gap: {EG}")
+        print(f"Mean Median: {MM}")
+        print(f"Democratic-won Districts: {D_win}")
+        print(f"Cut Edges: {cut_edge}")
+    
     # Measure execution time
     end_time = time.time()
     print("The time of execution of the program is:", (end_time - start_time) / 60, "mins")
