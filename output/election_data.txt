@@ -1,0 +1,18 @@
+
+G18GOV:
+Efficiency Gap: -0.08437353648256268
+Mean Median: -0.08861756472901389
+Democratic-won Districts: 5
+Cut Edges Count: 770
+
+G18ATG:
+Efficiency Gap: -0.15073605170314403
+Mean Median: -0.05607639008088422
+Democratic-won Districts: 5
+Cut Edges Count: 773
+
+G18AGR:
+Efficiency Gap: -0.15073605170314403
+Mean Median: -0.054166515958085804
+Democratic-won Districts: 4
+Cut Edges Count: 805
