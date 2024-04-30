@@ -123,14 +123,26 @@ def main():
     # Cut Edges
     cut_edges = gather_data(random_walk, election, "cut_edges")
 
-    # Print the gathered data
-    for election, EG, MM, D_win, cut_edge in zip(elections, EGs, MMs, D_wins, cut_edges):
-        print(f"\n{election.name}:")
-        print(f"Efficiency Gap: {EG}")
-        print(f"Mean Median: {MM}")
-        print(f"Democratic-won Districts: {D_win}")
-        print(f"Cut Edges: {cut_edge}")
-    
+    plt.figure()
+    plt.hist(EGs, align='left')
+    plt.title(f"Efficiency Gap Histogram")
+    plt.savefig(f"./output/10steps/eg.png")
+
+    plt.figure()
+    plt.hist(MMs, align='left')
+    plt.title(f"Mean Median Histogram")
+    plt.savefig(f"./output/10steps/mm.png")
+
+    plt.figure()
+    plt.hist(D_wins, align='left')
+    plt.title(f"Democratic-won Districts Histogram")
+    plt.savefig(f"./output/10steps/D_wins.png")
+
+    plt.figure()
+    plt.hist(cut_edges, align='left')
+    plt.title(f"Cut Edges Histogram")
+    plt.savefig(f"./output/10steps/cut_edges.png")
+
     # Measure execution time
     end_time = time.time()
     print("The time of execution of the program is:", (end_time - start_time) / 60, "mins")
