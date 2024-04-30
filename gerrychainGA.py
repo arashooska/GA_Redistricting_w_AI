@@ -13,7 +13,7 @@ from gerrychain.metrics import mean_median, efficiency_gap
 # ------------------------- Define Constants -------------------------
 POPULATION_TOLERANCE = 0.2
 NUM_GA_DISTS = 14
-NUM_STEPS = 10
+NUM_STEPS = 1000
 
 # ---------------------------- Load Graph ----------------------------
 def load_graph(file_path):
@@ -126,22 +126,22 @@ def main():
     plt.figure()
     plt.hist(EGs, align='left')
     plt.title(f"Efficiency Gap Histogram")
-    plt.savefig(f"./output/10steps/eg.png")
+    plt.savefig(f"./output/1000steps/eg.png")
 
     plt.figure()
     plt.hist(MMs, align='left')
     plt.title(f"Mean Median Histogram")
-    plt.savefig(f"./output/10steps/mm.png")
+    plt.savefig(f"./output/1000steps/mm.png")
 
     plt.figure()
     plt.hist(D_wins, align='left')
     plt.title(f"Democratic-won Districts Histogram")
-    plt.savefig(f"./output/10steps/D_wins.png")
+    plt.savefig(f"./output/1000steps/D_wins.png")
 
     plt.figure()
     plt.hist(cut_edges, align='left')
     plt.title(f"Cut Edges Histogram")
-    plt.savefig(f"./output/10steps/cut_edges.png")
+    plt.savefig(f"./output/1000steps/cut_edges.png")
 
     # Measure execution time
     end_time = time.time()
