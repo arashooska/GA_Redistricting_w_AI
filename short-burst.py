@@ -30,6 +30,7 @@ parser.add_argument("score", metavar="score_function", type=int,
                     choices=[0,1,2,3,4])
 args = parser.parse_args()
 
+# TODO: What is a score function?
 score_functs = {0: None, 1: Gingleator.reward_partial_dist, 
                 2: Gingleator.reward_next_highest_close,
                 3: Gingleator.penalize_maximum_over,
@@ -38,10 +39,10 @@ score_functs = {0: None, 1: Gingleator.reward_partial_dist,
 BURST_LEN = args.l
 NUM_GA_DIST = 14
 ITERS = args.iters
-N_SAMPS = 10
+N_SAMPS = 10 # TODO: Number of samples? What samples?
 SCORE_FUNCT = None
 EPS = 0.045
-MIN_POP_COL = args.col
+MIN_POP_COL = args.col # TODO: Minority population = "BVAP"?
 
 GA_graph = gpd.from_json("./GA_clean.json".format("GA"))
 
@@ -53,6 +54,7 @@ my_updaters = {"population": Tally("TOTPOP", alias="population"),
                "cut_edges": cut_edges, 
                "district Black": Tally("BVAP", alias="district Black")}
 
+# TODO: Assignment = "CD"? 
 initial_partition = Partition(GA_graph, assignment="CD", updaters=my_updaters)
 
 gingles = Gingleator(initial_partition, pop_col="TOTPOP",
