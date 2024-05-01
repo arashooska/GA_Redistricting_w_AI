@@ -198,12 +198,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# TODO: Outlier Analysis:
-# https://usfca.instructure.com/courses/1619920/files/71989240?module_item_id=18277305
-# https://usfca.instructure.com/courses/1619920/files/71989252?module_item_id=18277306
-# https://gerrychain.readthedocs.io/en/latest/
-# https://github.com/Dtphelan1/gerrymandering-mcmc/blob/master/src/GerrymanderingMCMC.py
-
-# TODO: Short Burst
-# https://github.com/vrdi/shortbursts-gingles/tree/main/state_experiments
