@@ -11,7 +11,7 @@ from gerrychain.metrics import mean_median, efficiency_gap
 # ------------------------- Define Constants -------------------------
 POPULATION_TOLERANCE = 0.2
 NUM_GA_DISTS = 14
-NUM_STEPS = 1000
+NUM_STEPS = 10
 
 # ---------------------------- Load Graph ----------------------------
 def load_graph(file_path):
@@ -113,7 +113,7 @@ def main():
         plt.xlabel("Efficiency Gap")
         plt.ylabel("Frequency")
         plt.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.savefig(f"./output/1000steps/{election}_eg_histogram.png")
+        plt.savefig(f"./output/10steps/{election}_eg_histogram.png")
         plt.close()
 
         plt.figure(figsize=(10, 8))
@@ -122,7 +122,7 @@ def main():
         plt.xlabel("Mean Median")
         plt.ylabel("Frequency")
         plt.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.savefig(f"./output//1000steps/{election}_mm_histogram.png")
+        plt.savefig(f"./output//10steps/{election}_mm_histogram.png")
         plt.close()
 
         plt.figure(figsize=(10, 8))
@@ -133,7 +133,7 @@ def main():
         plt.ylabel("Frequency")
         plt.legend()
         plt.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.savefig(f"./output/1000steps/{election}_district_wins_histogram.png")
+        plt.savefig(f"./output/10steps/{election}_district_wins_histogram.png")
         plt.close()
 
         plt.figure(figsize=(10, 8))
@@ -142,7 +142,7 @@ def main():
         plt.xlabel("Number of Cut Edges")
         plt.ylabel("Frequency")
         plt.grid(axis='y', linestyle='--', alpha=0.7)
-        plt.savefig(f"./output/1000steps/{election}_cut_edges_histogram.png")
+        plt.savefig(f"./output/10steps/{election}_cut_edges_histogram.png")
         plt.close()
 
     # Measure execution time
