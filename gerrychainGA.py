@@ -60,23 +60,6 @@ def execute_random_walk(initial_partition, num_steps, num_dist, graph):
     print(f"Successfully ran chain for {num_steps} steps!")
     return random_walk
 
-# ----------------------- Gather Relevant Data -----------------------
-# Gather relevant data for each partition in the random walk
-def gather_data(random_walk, election, data_type):
-    gathered_data = []
-    for partition in random_walk:
-        if data_type == "eg":
-            gathered_data.append(efficiency_gap(partition[election.name]))
-        elif data_type == "mm":
-            gathered_data.append(mean_median(partition[election.name]))
-        elif data_type == "D_wins":
-            gathered_data.append(partition[election.name].wins("Democratic"))
-        elif data_type == "R_wins":
-            gathered_data.append(partition[election.name].wins("Republican"))
-        elif data_type == "cut_edges":
-            gathered_data.append(len(partition["cut_edges"]))
-    return gathered_data
-
 # -------------------------- Main Function ---------------------------
 def main():
     # Load graph
@@ -107,90 +90,60 @@ def main():
     # Execute random walk
     random_walk = execute_random_walk(initial_partition, NUM_STEPS, NUM_GA_DISTS, ga_graph)
 
-    # Gather relevant data
-    EGs = []
-    MMs = []
-    D_wins = []
-    R_wins = []
-    R_wins = []
-    cut_edges = []
+
+    # Gather data for each election
+    election_data_dict = {}
+
     for election in elections:
-        # Efficency Gap
-        EGs = gather_data(random_walk, election, "eg")
-        # Mean Median
-        MMs = gather_data(random_walk, election, "mm")
-        # Dem-won Districts
-        D_wins = gather_data(random_walk, election, "D_wins")
-        # R_won Districts
-        R_wins = gather_data(random_walk, election, "R_wins")
+        election_data_dict[election.name] = {"eg": [], "mm": [], "d_wins": [], "r_wins": [], "cut_edges": []}
 
-    # Cut Edges
-    cut_edges = gather_data(random_walk, election, "cut_edges")
-
-    # Print the gathered data
-    # for election, EG, MM, D_win, R_win, cut_edge in zip(elections, EGs, MMs, D_wins, R_wins, cut_edges):
-    #     print(f"\n{election.name}:")
-    #     print(f"Efficiency Gap: {EG}")
-    #     print(f"Mean Median: {MM}")
-    #     print(f"Democratic-won Districts: {D_win}")
-    #     print(f"Republican-won Districts: {R_win}")
-    #     print(f"Cut Edges: {cut_edge}")
-
-    # Write the output to a text file
-    output_file = "./output/1000steps/outlier_analysis.txt"
-    with open(output_file, "w") as f:
-        for election, EG, MM, D_win, R_win, cut_edge in zip(elections, EGs, MMs, D_wins, R_wins, cut_edges):
-            f.write(f"\n{election.name}:\n")
-            f.write(f"Efficiency Gap: {EG}\n")
-            f.write(f"Mean Median: {MM}\n")
-            f.write(f"Democratic-won Districts: {D_win}\n")
-            f.write(f"Republican-won Districts: {R_win}\n")
-            f.write(f"Cut Edges Count: {cut_edge}\n")
-
-    
+    for election, data_dict in election_data_dict.items():
+        for partition in random_walk:
+            data_dict['eg'].append(efficiency_gap(partition[election]))
+            data_dict['mm'].append(mean_median(partition[election]))
+            data_dict['d_wins'].append(partition[election].wins("Democratic"))
+            data_dict['r_wins'].append(partition[election].wins("Republican"))
+            data_dict['cut_edges'].append(len(partition["cut_edges"]))
 
     # Plot histograms
-    plt.figure(figsize=(10, 8))
-    plt.hist(EGs, bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left')
-    plt.title("Efficiency Gap Histogram")
-    plt.xlabel("Efficiency Gap")
-    plt.ylabel("Probability Distribution")
-    plt.xticks(rotation=45, ha='right')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.savefig("./output/1000steps/eg.png")
-    plt.close()
+    for election, data_dict in election_data_dict.items():
+        plt.figure(figsize=(10, 8))
+        plt.hist(data_dict['eg'], bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left')
+        plt.title(f"Efficiency Gap Histogram - {election}")
+        plt.xlabel("Efficiency Gap")
+        plt.ylabel("Frequency")
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.savefig(f"./output/1000steps/{election}_eg_histogram.png")
+        plt.close()
 
-    plt.figure(figsize=(10, 8))
-    plt.hist(MMs, bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left')
-    plt.title("Mean Median Histogram")
-    plt.xlabel("Mean Median")
-    plt.ylabel("Probability Distribution")
-    plt.xticks(rotation=45, ha='right')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.savefig("./output/1000steps/mm.png")
-    plt.close()
+        plt.figure(figsize=(10, 8))
+        plt.hist(data_dict['mm'], bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left')
+        plt.title(f"Mean Median Histogram - {election}")
+        plt.xlabel("Mean Median")
+        plt.ylabel("Frequency")
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.savefig(f"./output//1000steps/{election}_mm_histogram.png")
+        plt.close()
 
-    plt.figure(figsize=(10, 8))
-    plt.hist(D_wins, bins=20, color='lightblue', edgecolor='black', alpha=0.7, align='left', label='Republican', density=True)
-    plt.hist(R_wins, bins=20, color='salmon', edgecolor='black', alpha=0.7, align='left', label='Democratic', density=True)
-    plt.title("Districts Won by Party Histogram")
-    plt.xlabel("Number of Districts Won")
-    plt.ylabel("Probability Distribution")
-    plt.legend()
-    plt.xticks(rotation=45, ha='right')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.savefig("./output/1000steps/DvsR_wins.png")
-    plt.close()
+        plt.figure(figsize=(10, 8))
+        plt.hist(data_dict['d_wins'], bins=20, color='lightblue', edgecolor='black', alpha=0.7, align='left', label='Democratic')
+        plt.hist(data_dict['r_wins'], bins=20, color='salmon', edgecolor='black', alpha=0.7, align='left', label='Republican')
+        plt.title(f"Districts Won by Party Histogram - {election}")
+        plt.xlabel("Number of Districts Won")
+        plt.ylabel("Frequency")
+        plt.legend()
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.savefig(f"./output/1000steps/{election}_district_wins_histogram.png")
+        plt.close()
 
-    plt.figure(figsize=(10, 8))
-    plt.hist(cut_edges, bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left', density=True)
-    plt.title("Cut Edges Histogram")
-    plt.xlabel("Number of Cut Edges")
-    plt.ylabel("Probability Distribution")
-    plt.xticks(rotation=45, ha='right')
-    plt.grid(axis='y', linestyle='--', alpha=0.7)
-    plt.savefig("./output/1000steps/cut_edges.png")
-    plt.close()
+        plt.figure(figsize=(10, 8))
+        plt.hist(data_dict['cut_edges'], bins=20, color='skyblue', edgecolor='black', alpha=0.7, align='left')
+        plt.title(f"Cut Edges Histogram - {election}")
+        plt.xlabel("Number of Cut Edges")
+        plt.ylabel("Frequency")
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.savefig(f"./output/1000steps/{election}_cut_edges_histogram.png")
+        plt.close()
 
     # Measure execution time
     end_time = time.time()
