@@ -245,7 +245,7 @@ class Gingleator:
         num_opportunity_dists: given a partition, name of the minority percent updater, and a
                                threshold, returns the number of opportunity districts.
         """
-        dist_precs = part[minority_prec].values()
+        dist_precs = part[minority_perc].values()
         return sum(list(map(lambda v: v >= threshold, dist_precs)))
 
 
