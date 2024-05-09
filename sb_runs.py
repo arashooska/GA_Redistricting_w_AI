@@ -11,9 +11,10 @@ score_functs = {0: None,
                 4: Gingleator.penalize_avg_over,
                 5: Gingleator.num_opportunity_dists}
 
-BURST_LENS = [10, 25, 50, 100, 200]
+# BURST_LENS = [10, 25, 50, 100, 200]
+BURST_LENS = [25]
 NUM_DISTRICTS = 14
-ITERS = 10000
+ITERS = 8000
 POP_COL = "TOTPOP"
 N_SAMPS = 10
 SCORE_FUNCT = score_functs[5]
