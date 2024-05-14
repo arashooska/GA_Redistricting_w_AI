@@ -10,3 +10,9 @@ MAUP_GA_Remake.ipynb - Jupyter notebook to clean the data and create a shape fil
 gingleator.py - Class that is used to run short burst. Copied from here: https://github.com/vrdi/shortbursts-gingles/tree/main/state_experiments
 sb_runs.py - Runs short burst resulting in npy files containing information on the maximum possible VRA districts.
 short-burst-analysis.ipynb - Creates the plot to analyze the short burst runs
+
+# Link to data used
+
+Population, election, and vap data is all located in this Google Drive folder.
+
+https://drive.google.com/drive/folders/1_qCsDnzNiH83EdaBYgFTKlUuB1lj3MYC?usp=sharing
